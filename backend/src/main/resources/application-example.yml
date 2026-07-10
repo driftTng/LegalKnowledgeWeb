@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/legal_knowledge
+    username: postgres
+    password: 你的数据库密码
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: 请随机生成一个长字符串作为 JWT 签名密钥
+  access-token-expiration: 1800000
+  refresh-token-expiration: 604800000
+
+# DeepSeek AI 配置
+deepseek:
+  api-key: 你的DeepSeek-API-Key
+  api-url: https://api.deepseek.com/v1/chat/completions
+  model: deepseek-chat

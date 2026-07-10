@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_HOME">./logs</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 控制台 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan} [%X{traceId}] [%t] %style{%logger{36}}{cyan} - %msg%n" />
+        </Console>
+
+        <!-- 滚动文件：所有日志 -->
+        <RollingFile name="File" fileName="${LOG_HOME}/legal-knowledge.log"
+                     filePattern="${LOG_HOME}/legal-knowledge.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] [%t] %logger{36} - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <!-- 滚动文件：Error 单独存 -->
+        <RollingFile name="ErrorFile" fileName="${LOG_HOME}/error.log"
+                     filePattern="${LOG_HOME}/error.%d{yyyy-MM-dd}.log">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] [%t] %logger{36} - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="90" />
+        </RollingFile>
+
+        <!-- SQL 日志专用，不混在主日志里 -->
+        <RollingFile name="SqlFile" fileName="${LOG_HOME}/sql.log"
+                     filePattern="${LOG_HOME}/sql.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!--
+          Mapper 包只输出到 sql.log，additivity="false" 阻止传播到根 Logger，
+          避免 SQL 在主日志文件里刷屏。
+         -->
+        <Logger name="com.legalknowledge.mapper" level="DEBUG" additivity="false">
+            <AppenderRef ref="SqlFile" />
+            <AppenderRef ref="Console" />  <!-- 开发时控制台也能看到 SQL -->
+        </Logger>
+
+        <!-- 项目包 -->
+        <Logger name="com.legalknowledge" level="DEBUG" />
+
+        <!-- 框架 -->
+        <Logger name="org.springframework" level="INFO" />
+        <Logger name="org.mybatis" level="INFO" />
+
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+            <AppenderRef ref="ErrorFile" />
+        </Root>
+    </Loggers>
+</Configuration>
